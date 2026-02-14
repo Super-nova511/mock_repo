@@ -1,0 +1,380 @@
+Q1 – 
+A.Write a Scala program to calculate the sum of the last 3 elements of an array of integers. If the array length is less than 3 then return the sum of the array. Return 0 if the array is empty.
+object ArraySum {
+     | def main(args: Array[String]):Unit = {
+     | val arr = Array(5, 10, 15, 20, 25)
+     | val result =
+     | if (arr.isEmpty) {
+     | 0
+     | } else if (arr.length < 3) {
+     | arr.sum
+     | } else {
+     | arr.takeRight(3).sum
+     | }
+     | println("Sum = " +result)
+     | }
+     | }
+object ArraySum
+ArraySum.main(Array())
+
+B.Write a Scala program to convert the last 4 characters of a given string to upper case. If the length of the string has less than 4 then uppercase all the characters.
+object StringUpper {
+     | def main(args: Array[String]): Unit = {
+     | val str = "programming"
+     | val result =
+     | if (str.length < 4) {
+     | str.toUpperCase
+     | } else {
+     | str.dropRight(4) + str.takeRight(4).toUpperCase
+     | }
+     | println("Result =" + result)
+     | }
+     | }
+object StringUpper
+StringUpper.main(Array())
+
+C.Write a Scala code to perform word count.
+object WordCount {
+     | def main(args: Array[String]): Unit = {
+     | val sentence = "I love Scala programming"
+     | val words = sentence.split(" ")
+     | val count = words.length
+     | println("Word count =" + count)
+     | }
+     | }
+object WordCount
+WordCount.main(Array())
+
+D.Write a Scala program to reverse a given number.
+object ReverseNumber {
+     | def main(args: Array[String]): Unit = {
+     | val num = 1234
+     | val reversed = num.toString.reverse.toInt
+     | println("Reversed number =" + reversed)
+     | }
+     | }
+object ReverseNumber
+ReverseNumber.main(Array())
+
+E.Write a Scala program to create a map and find the difference between two maps.
+object MapDifference {
+     | def main(args: Array[String]): Unit = {
+     | val map1 = Map(1 -> "A", 2 -> "B", 3 -> "C")
+     | val map2 = Map(2 -> "B")
+     | val diff = map1 -- map2.keys
+     | println("Difference =" + diff)
+     | }
+     | }
+object MapDifference
+MapDifference.main(Array())
+________________________________________
+Q2 –
+Before you do spark-shell do this:
+hadoop fs -put file.json
+active:
+spark-shell
+then read in spark:
+val df = sqlContext.read.json("data.json")
+A
+1.Load the onlinevoting.json file into an RDD and print the first 5 records.
+val rdd = sc.textFile("onlinevoting.json")
+rdd.take(5).foreach(println)
+
+2.Extract only the voter_name field and display the first 10 names.
+val df = sqlContext.read.json("onlinevoting.json")
+df.select("voter_name").show(10)
+
+3.Create a key-value RDD with voter_id as key and the entire record as value.
+val pairRDD = df.rdd.map(row =>
+  (row.getAs[Long]("voter_id"), row)
+)
+pairRDD.take(5).foreach(println)
+
+B
+1.Filter voters who belong to the state "Florida".
+df.select("state").distinct().show()
+df.filter(df("state") === "Värmland").show()
+
+2.Extract voters whose city name starts with the letter "S".
+df.filter(df("city").startsWith("S")).show()
+
+3.Get all voters from the "North" voting districts.
+df.filter(df("district") === "North").show()
+
+C
+1.Create an RDD of tuples (state, 1) and count voters per state.
+df.groupBy("state").count().show()
+
+2.Create an RDD of (voter_id, email) and display the first 10 records.
+df.select("voter_id", "email").show(10)
+
+3.Compute the square of each voter's age and display the first 10.
+df.select(($"age" * $"age").alias("age_square")).show(10)
+
+D
+1.Count how many voters are from each voting district.
+df.groupBy("district").count().show()
+
+2.Count how many voters belong to "California".
+df.filter(df("state") === "Braga").count()
+
+3.Count how many voters voted in each city.
+df.groupBy("city").count().show()
+
+E
+1.Sort voters by age in ascending order.
+df.orderBy("age").show()
+df.orderBy(df("age").asc).show()
+
+2.Use flatMap to split voter emails by domain and count frequency of each domain.
+df.select(split(df("email"), "@")(1).alias("domain"))
+  .groupBy("domain")
+  .count()
+  .show()
+
+3.Identify which city has the highest number of voters.
+df.groupBy("city")
+  .count()
+  .orderBy($"count".desc)
+  .show(1)
+________________________________________
+Q3 – 
+A
+1.Load the restaurant dataset into dataframe.
+val rest = sqlContext.read.json("restaurant.json")
+rest.show(5)
+
+2.Retrieve all data from the restaurants table.
+rest.show()
+
+3.Select the name, rating, and type_of_food for all restaurants.
+rest.select("name", "rating", "type_of_food").show()
+
+B
+1.Retrieve the first 15 records from the table.
+rest.show(15)
+
+2.Select restaurants with the outcode "CF24".
+rest.select("outcode").distinct().show()
+
+3.Find all restaurants that have "Grill" in their type_of_food.
+rest.filter(rest("type_of_food").contains("Grill")).show()
+
+C
+1.Find the number of restaurants for each type_of_food.
+rest.groupBy("type_of_food").count().show()
+
+2.Find the highest rating among all restaurants.
+rest.agg(max("rating")).show()
+
+3.Find the average rating for each type_of_food.
+rest.groupBy("type_of_food").avg("rating").show()
+
+D
+1.Determine the type_of_food with the highest average rating.
+rest.groupBy("type_of_food").avg("rating").orderBy($"avg(rating)".desc).show(1)
+
+2.Retrieve all restaurants sorted by rating in descending order.
+rest.orderBy(rest("rating").desc).show()
+
+3.Find the top 10 highest-rated restaurants.
+rest.orderBy(rest("rating").desc).show(10)
+
+E
+1.Calculate the running total of restaurants for each type_of_food.
+rest.groupBy("type_of_food").count().show()
+
+2.Categorize restaurants as:
+o	"Excellent" (rating >= 5)
+o	"Good" (rating >= 4 and < 5)
+o	"Average" (rating < 4)
+
+rest.withColumn("category",
+  when(rest("rating") >= 5, "Excellent")
+  .when(rest("rating") >= 4, "Good")
+  .otherwise("Average")
+).show()
+
+3.	
+Find the average rating for each type_of_food, but only for types with more than 10 restaurants.
+rest.groupBy("type_of_food").agg(avg("rating"), count("*")).filter("count(1) > 10").show()
+
+
+Q1 
+A.Write a Scala program to check whether two given positive integers have the same last digit.
+object SameDigit {
+  def main(args: Array[String]): Unit = {
+    val a = 27
+    val b = 57
+    if (a % 10 == b % 10)
+      println("Same last digit")
+    else
+      println("Different last digit")
+  }
+}
+
+B.Write a Scala code to perform word count.
+object WordCount {
+  def main(args: Array[String]): Unit = {
+    val sentence = "Scala is very easy to learn"
+    val count = sentence.split(" ").length
+    println("Word count = " + count)
+  }
+}
+
+C.Write a Scala program to print Fibonacci series up to 100.
+object Fibonacci {
+  def main(args: Array[String]): Unit = {
+    var a = 0
+    var b = 1
+    while (a <= 100) {
+      println(a)
+      val next = a + b
+      a = b
+      b = next
+    }
+  }
+}
+
+D.Write a Scala program to convert the last 4 characters of a given string in upper case. If the length of the string has less than 4 then uppercase all the characters.
+object UpperLastFour {
+  def main(args: Array[String]): Unit = {
+    val str = "programming"
+    val result =
+      if (str.length < 4)
+        str.toUpperCase
+      else
+        str.dropRight(4) + str.takeRight(4).toUpperCase
+    println(result)
+  }
+}
+
+E.Write a Scala program to find whether a string is palindrome or not.
+object Palindrome {
+  def main(args: Array[String]): Unit = {
+    val str = "madam"
+    if (str == str.reverse)
+      println("Palindrome")
+    else
+      println("Not palindrome")
+  }
+}
+________________________________________
+Q2 
+A
+1.Load the restaurant.json file into an RDD and print the first 10 records.
+val rdd = sc.textFile("restaurant.json")
+rdd.take(10).foreach(println)
+
+2.Extract and print the names of the first 10 restaurants.
+val rdd = sc.textFile("restaurant.json")
+rdd.take(10).foreach(println)
+
+3.Create a key-value RDD with name as key and rating as value.
+val pairRDD = df.rdd.map(row =>
+  (row.getAs[String]("name"), row.getAs[String]("rating"))
+)pairRDD.take(5).foreach(println)
+
+B
+1.Filter restaurants serving "Chinese" cuisine.
+df.filter(df("type_of_food") === "Chinese").show()
+
+2.Find restaurants with "Pizza" in their type_of_food.
+df.filter(df("type_of_food").contains("Pizza")).show()
+
+3.Extract restaurants with "Not yet rated" as their rating.
+df.filter(df("rating") === "Not yet rated").show()
+
+C
+1.Create an RDD with (postcode, 1) and count restaurants per postcode.
+df.groupBy("postcode").count().show()
+
+2.Extract (name, type_of_food) pairs.
+df.select("name", "type_of_food").show()
+
+3.Find the length of each restaurant name.
+import org.apache.spark.sql.functions._
+df.select(length(df("name")).alias("name_length")).show()
+
+D
+1.	
+Calculate the average rating of all restaurants (excluding "Not yet rated").
+df.filter($"rating" =!= "Not yet rated").agg(avg($"rating".cast("double"))).show()
+
+2.	
+Count how many restaurants are in "Manchester".
+df.filter(df("city") === "Manchester").count()
+
+3.Create two RDDs: one for "Chinese" restaurants and one for "Indian". Perform a union.
+val chinese = df.filter(df("type_of_food") === "Chinese")
+val indian  = df.filter(df("type_of_food") === "Indian")
+chinese.union(indian).show()
+
+E
+1.Check whether "Bristol" restaurants exist in the dataset.
+df.filter(df("city") === "Bristol").show()
+
+2.Create a pair RDD (type_of_food, rating) and compute average rating per food type.
+import org.apache.spark.sql.functions._
+df.groupBy("type_of_food").avg("rating").show()
+
+3.Use mapPartitions to calculate the sum of ratings in each partition.
+df.rdd.mapPartitions(p =>
+  Iterator(p.map(_.getAs[Double]("rating")).sum)
+).collect().foreach(println)
+________________________________________
+Q3 —
+A
+1.Load the onlinevoting.json file into dataframe.
+val vote = sqlContext.read.json("onlinevoting.json")
+vote.show(5)
+
+2.Select the voter_name and email for all voters.
+vote.select("voter_name", "email").show()
+
+3.Get the list of all cities in "California".
+vote.filter(vote("state") === "California").select("city").show()
+
+B
+1.	
+Select voters from the "North" voting district.
+vote.filter(vote("district") === "North").show()
+2.	
+Find all voters whose age is between 30 and 40.
+vote.filter(vote("age").between(30, 40)).show()
+3.	
+Count the total number of voters.
+vote.count()
+
+C
+1.	
+Find the maximum age among all voters.
+vote.agg(max("age")).show()
+
+2.Get the number of voters per city in "New York" state.
+vote.filter(vote("state") === "New York").groupBy("city").count().show()
+
+3.Determine the state with the highest number of voters.
+vote.groupBy("state").count().orderBy(desc("count")).show(1)
+
+D
+1.List all voters in alphabetical order of their names.
+vote.orderBy("voter_name").show()
+
+2.List the states and the number of voters in each, sorted by the voter count in ascending order.
+vote.groupBy("state").count().orderBy("count").show()
+
+3.Find all voters whose name starts with "J".
+vote.filter(vote("voter_name").startsWith("J")).show()
+
+E
+1.List the top 3 states with the most voters.
+vote.groupBy("state").count().orderBy(desc("count")).show(3)
+
+2.Find the voter(s) with the longest name.
+import org.apache.spark.sql.functions._
+vote.withColumn("len", length(vote("voter_name"))).orderBy(desc("len")).show(1)
+
+3.Find the date with the highest voter turnout.
+vote.groupBy("date").count().orderBy(desc("count")).show(1)
+
